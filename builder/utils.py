@@ -8,11 +8,22 @@ import requests
 RE_WHEEL_PLATFORM = re.compile(r"^(?P<name>.*-)cp\d{2}m-linux_\w+\.whl$")
 
 
-def alpine_version() -> str:
-    """Return alpine version for index server."""
-    version = Path("/etc/alpine-release").read_text().split(".")
+def get_os_release() -> Dict[str, int]:
+    """Parse /etc/os_release."""
+    with open("/etc/os-release") as f:
+        os_release = {}
+        for line in f:
+            k,v = line.rstrip().split("=")
+            # .strip('"') will remove if there or else do nothing
+            os_release[k] = v.strip('"') 
+            
+    return os_release
 
-    return f"alpine-{version[0]}.{version[1]}"
+
+def os_version() -> str:
+    """Return os version for index server."""
+    os_release=get_os_release()           
+    return f"{os_release['ID']-{os_release['VERSION_ID']}"
 
 
 def build_arch() -> str:

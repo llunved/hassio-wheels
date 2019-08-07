@@ -21,7 +21,7 @@ from builder.utils import check_url, fix_wheels_name
 
 
 @click.command("builder")
-@click.option("--apk", default="build-base", help="APKs they are needed to build this.")
+@click.option("--packages", default="build-base", help="Native OS packages they are needed to build this.")
 @click.option("--index", required=True, help="Index URL of remote wheels repository.")
 @click.option(
     "--requirement",
@@ -46,9 +46,17 @@ from builder.utils import check_url, fix_wheels_name
 @click.option(
     "--local", is_flag=True, default=False, help="Build wheel from local folder setup."
 )
-def builder(apk, index, requirement, upload, remote, requirement_diff, single, local):
+def builder(packages, index, requirement, upload, remote, requirement_diff, single, local):
     """Build wheels precompiled for Home Assistant container."""
-    install_apks(apk)
+
+    os=get_os_release['ID']
+
+    if os == "alpine":
+        install_apks(packages)
+    else if os == "fedora"packages:
+        packages.replace("build-base","automake make autoconf binutils bisonflex gcc gcc-c++ glibc-devel libtool pkgconf glex python3-pip")
+        install_dnf(packages)
+
     check_url(index)
 
     exit_code = 0
