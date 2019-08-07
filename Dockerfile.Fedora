@@ -9,7 +9,7 @@ COPY requirements.txt /usr/src/
 RUN dnf -y upgrade && \
     dnf install -y \
         rsync \
-        openssh-client \
+        openssh-clients \
         python3-pip && \
     pip3 install --no-cache-dir --no-index --only-binary=:all:  \
         -r /usr/src/requirements.txt && \
