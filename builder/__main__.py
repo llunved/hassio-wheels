@@ -53,7 +53,7 @@ def builder(packages, index, requirement, upload, remote, requirement_diff, sing
 
     if os == "alpine":
         install_apks(packages)
-    else if os == "fedora"packages:
+    elif os == "fedora":
         packages.replace("build-base","automake make autoconf binutils bisonflex gcc gcc-c++ glibc-devel libtool pkgconf glex python3-pip")
         install_dnf(packages)
 

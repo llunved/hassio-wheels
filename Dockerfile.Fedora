@@ -5,27 +5,56 @@ ARG BUILD_ARCH
 ENV ARCH=${BUILD_ARCH}
 
 # Install requirements
-RUN dnf -y upgrade && \
-    dnf install -y \
+RUN dnf install -y \
         rsync \
         openssh-clients \
-        python3-pip && \
-        python3-click && \
-	python3-Cython && \
-	python3-request && \	
-    yum clean all -y
+        python3-pip \
+        python3-click \
+	python3-Cython \
+	python3-requests \
+	pipenv \ 
+	which \
+	git \	
+    && yum clean all -y
 
+RUN cd /usr/src && git clone https://github.com/thoth-station/thamos.git \
+    && pip3 -v install --no-cache-dir /usr/src/thamos && rm -rf /usr/src/thamos/usr/src/thamos
+#RUN pip3 install --upgrade thamos
+
+COPY thamos_config_template.yaml /usr/src/
 COPY requirements.txt /usr/src/
 
-RUN    pip3 install --no-cache-dir  \
-        -r /usr/src/requirements.txt && \
-    rm -f /usr/src/requirements.txt  
+RUN ls -la /usr/src
+
+# Prep for Thoth - must be pipenv for now.
+RUN cd /usr/src/ \
+    && sed -ie 's/^\([0-9a-zA-Z.-]\+\)\=\=.*/\1/' requirements.txt \
+    && sed -ie 's/^\(.*\)/\L\1/' requirements.txt \
+    && pipenv lock -r \
+    && cp -vf Pipfile Pipfile.orig \
+    && cp -vf Pipfile.lock Pipfile.lock.orig \
+    && rm -fv /usr/src/*.lock \
+    # && rm -fv /usr/src/requirements.txt \
+    && ls -la /usr/src
+
+# Generat Thoth config
+RUN cd /usr/src && thamos -v -d /usr/src/ config --template /usr/src/thamos_config_template.yaml -I && cat /usr/src/.thoth.yaml
+
+# Run the Thamos adviser
+RUN cd /usr/src && thamos -v -d /usr/src/ advise 
+#|| echo "Hmm. Ignoring Thamos failure, going with existing stack"
+
+
+RUN ls -la /usr/src
+
+RUN cd /usr/src/ \
+    && pip3 install
 
 # Install builder
 COPY . /usr/src/builder/
-RUN pip3 -v install --no-cache-dir \
-        /usr/src/builder \
+RUN pip3 -v install --no-cache-dir /usr/src/builder \
     && rm -fr /usr/src/builder
 
 WORKDIR /data
-ENTRYPOINT [ "python3", "-m", "builder" ]
+#ENTRYPOINT [ "python3", "-m", "builder" ]
+

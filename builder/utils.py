@@ -23,7 +23,7 @@ def get_os_release() -> Dict[str, int]:
 def os_version() -> str:
     """Return os version for index server."""
     os_release=get_os_release()           
-    return f"{os_release['ID']-{os_release['VERSION_ID']}"
+    return f"{os_release['ID']}-{os_release['VERSION_ID']}"
 
 
 def build_arch() -> str:
