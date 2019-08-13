@@ -2,7 +2,8 @@
 
 
 # CONTAINER BUILD
-```export HWARCH=`uname -m`; sudo podman build --net=host --build-arg BUILD_FROM=fedora:28 --build-arg BUILD_ARCH=${HWARCH} -t hass-f28-${HWARCH}-builder -f Dockerfile.Fedora .
+```
+export HWARCH=$(uname -m); sudo podman build --net=host --build-arg BUILD_FROM=fedora:28 --build-arg BUILD_ARCH=${HWARCH} -t hass-f28-${HWARCH}-builder -f Dockerfile.Fedora .
 ```
 
 # Hass.io Wheels builder
