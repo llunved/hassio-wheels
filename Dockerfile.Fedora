@@ -51,15 +51,15 @@ RUN cd /usr/local/src/ \
 
 # Install builder
 COPY . /usr/local/src/builder/
-#RUN cd /usr/local/src \
+RUN cd /usr/local/src/builder \
 #    && pipenv install /usr/local/src/builder \
 #    && pipenv run pip3 -v install --no-cache-dir /usr/local/src/builder \
-#    && pipenv run pip3 -v wheel /usr/local/src/builder 
+    && pipenv run python3 setup.py sdist bdist_wheel
 #    && pip3 -v install --no-cache-dir /usr/local/src/builder \
 #    && rm -fr /usr/local/src/builder
 
 #WORKDIR /data
 WORKDIR /usr/local/src
 #ENTRYPOINT [ "python3", "-m", "builder" ]
-ENTRYPOINT [ "pipenv", "run", "/usr/local/src/builder" ]
+#ENTRYPOINT [ "pipenv", "run", "python3 -m builder" ]
 
