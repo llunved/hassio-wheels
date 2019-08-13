@@ -19,9 +19,7 @@ RUN dnf install -y \
 
 RUN cd /usr/local/src && git clone https://github.com/thoth-station/thamos.git \
     && pip3 -v install --no-cache-dir /usr/local/src/thamos \
-#    && pipenv install /usr/local/src/thamos \
     && rm -rf /usr/local/src/thamos/usr/local/src/thamos
-#RUN pip3 install --upgrade thamos
 
 COPY thamos_config_template.yaml /usr/local/src/
 COPY requirements.txt /usr/local/src/
@@ -31,17 +29,13 @@ RUN ls -la /usr/local/src
 # Prep for Thoth - must be pipenv for now.
 RUN cd /usr/local/src/ \
     && sed -ie 's/^\([0-9a-zA-Z.-]\+\)\=\=.*/\1/' requirements.txt \
-    && sed -ie 's/^\(.*\)/\L\1/' requirements.txt \
+    #&& sed -ie 's/^\(.*\)/\L\1/' requirements.txt \
     && pipenv lock -r \
-    && cp -vf Pipfile Pipfile.orig \
-    && cp -vf Pipfile.lock Pipfile.lock.orig \
     && rm -fv /usr/local/src/*.lock \
-    # && rm -fv /usr/local/src/requirements.txt \
-    && ls -la /usr/local/src
+    && rm -fv /usr/local/src/requirements.txt 
 
 # Generat Thoth config
 RUN cd /usr/local/src \
-#    && pipenv run thamos -v -d /usr/local/src/ config --template /usr/local/src/thamos_config_template.yaml -I \
     && thamos -v -d /usr/local/src/ config --template /usr/local/src/thamos_config_template.yaml -I \
     && cat /usr/local/src/.thoth.yaml
 
@@ -49,27 +43,23 @@ RUN ls -la /usr/local/src
 
 # Run the Thamos adviser
 RUN cd /usr/local/src \
-#    && pipenv run thamos -v -d /usr/local/src/ advise 
     && thamos -v -d /usr/local/src/ advise 
 #|| echo "Hmm. Ignoring Thamos failure, going with existing stack"
 
-
-RUN cp /usr/local/src/Pipfile.lock /usr/local/src/Pipfile.lock.thoth
-
-RUN ls -la /usr/local/src
-
 RUN cd /usr/local/src/ \
     && pipenv install --deploy --keep-outdated
-#    && pip3 install
 
 # Install builder
 COPY . /usr/local/src/builder/
-RUN cd /usr/local/src \
+#RUN cd /usr/local/src \
 #    && pipenv install /usr/local/src/builder \
-    && pipenv run pip3 -v install --no-cache-dir /usr/local/src/builder \
+#    && pipenv run pip3 -v install --no-cache-dir /usr/local/src/builder \
+#    && pipenv run pip3 -v wheel /usr/local/src/builder 
 #    && pip3 -v install --no-cache-dir /usr/local/src/builder \
-    && rm -fr /usr/local/src/builder
+#    && rm -fr /usr/local/src/builder
 
-WORKDIR /data
+#WORKDIR /data
+WORKDIR /usr/local/src
 #ENTRYPOINT [ "python3", "-m", "builder" ]
+ENTRYPOINT [ "pipenv", "run", "/usr/local/src/builder" ]
 
